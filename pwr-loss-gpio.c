@@ -58,11 +58,14 @@ static irq_handler_t pwrloss_irq_handler(unsigned int irq, void *dev_id, \
 static int __init pwrloss_gpio_init(void) {
     int status = 0;
     
-    printk(KERN_INFO "gpio-driver: Initializing..\n");
+    printk(KERN_INFO "pwr-loss-detect-driver: Initializing..\n");
     
     if(!gpio_is_valid(gpioNo)) {
-        printk(KERN_WARNING "gpio-driver: Invalid GPIO number!\n");
+        printk(KERN_WARNING "pwr-loss-detect-driver: Invalid GPIO number!\n");
         return -ENODEV;
+    }
+    else {
+    printk(KERN_INFO "pwr-loss-detect-driver: Initialized..\n");
     }
     
     gpio_request(gpioNo, "sysfs");
@@ -71,10 +74,11 @@ static int __init pwrloss_gpio_init(void) {
                                 //user space
     
     if (!gpio_get_value(gpioNo)) {
-        printk(KERN_INFO "gpio-driver: Power OK!");
+        printk(KERN_INFO "pwr-loss-detect-driver: Power source OK!");
     }
     else {
-        printk(KERN_WARNING "gpio-driver: Power loss detected!");
+        printk(KERN_WARNING "pwr-loss-detect-driver: No power source!");
+        
     }
 
 
@@ -82,11 +86,9 @@ static int __init pwrloss_gpio_init(void) {
     
     status = request_irq(irqNumber,
                         (irq_handler_t) pwrloss_irq_handler,
-                        IRQF_TRIGGER_RISING,
+                        (IRQF_TRIGGER_RISING && IRQF_TRIGGER_HIGH),
                         "power-loss-gpio-handler",
                         NULL);
-    
-    printk(KERN_INFO "gpio-driver: irq status: %d\n", status);
     return status;
 }
 
@@ -99,7 +101,7 @@ static void __exit pwrloss_gpio_exit(void) {
 static irq_handler_t pwrloss_irq_handler(unsigned int irq, void *dev_id, \
                                          struct pt_regs *regs) {
     
-    printk(KERN_WARNING "gpio-driver: Power loss detected!"); 
+    printk(KERN_WARNING "pwr-loss-detect-driver: Power loss detected!\n"); 
     return (irq_handler_t) IRQ_HANDLED;
 }
 
