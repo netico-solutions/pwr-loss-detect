@@ -58,7 +58,8 @@ static struct class *dev_class;
 static struct cdev pwrloss_cdev;
 static dev_t dev = 0;
 
-static bool power = true;
+static int ret;
+int power = 1;
 
 /* ----------------------------------------------------------------------------
  * FUNCTION PROTOTYPES
@@ -111,6 +112,14 @@ static int __init pwrloss_gpio_init(void) {
         printk(KERN_WARNING "pwr-loss-detect-driver: No power source!");
         
     }
+    
+    irqNumber = gpio_to_irq(gpioNo);
+    
+    status = request_irq(irqNumber,
+                        (irq_handler_t) pwrloss_irq_handler,
+                        (IRQF_TRIGGER_RISING && IRQF_TRIGGER_HIGH),
+                        "power-loss-gpio-handler",
+                        NULL);
 
     if((alloc_chrdev_region(&dev, 0, 1, "pwrloss_Dev")) <0) {
         printk(KERN_WARNING "Cannot allocate major number!\n");
@@ -138,16 +147,7 @@ static int __init pwrloss_gpio_init(void) {
         goto r_device;
     }
     printk(KERN_INFO "Device driver insert.. Done!\n");
-    return 0;
 
-
-    irqNumber = gpio_to_irq(gpioNo);
-    
-    status = request_irq(irqNumber,
-                        (irq_handler_t) pwrloss_irq_handler,
-                        (IRQF_TRIGGER_RISING && IRQF_TRIGGER_HIGH),
-                        "power-loss-gpio-handler",
-                        NULL);
     return status;
 
 r_device: 
@@ -173,7 +173,7 @@ static irq_handler_t pwrloss_irq_handler(unsigned int irq, void *dev_id, \
                                          struct pt_regs *regs) {
     
     printk(KERN_WARNING "pwr-loss-detect-driver: Power loss detected!\n");
-    power = false;
+    power = 0;
     return (irq_handler_t) IRQ_HANDLED;
 }
 
@@ -184,7 +184,9 @@ static long pwrloss_ioctl(struct file * fd, unsigned int cmd, unsigned long arg)
                 break;
 
             case PWRLOSS_NOTIFY:
-                copy_to_user((int32_t*) arg, &power, sizeof(power));
+                printk(KERN_INFO "entered pwrloss notify sw case\n");
+                ret = copy_to_user((int32_t*) arg, &power, sizeof(power));
+                printk(KERN_INFO "return value of copy to user is: %d\n", ret);
                 break;
         }
 

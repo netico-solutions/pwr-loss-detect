@@ -9,6 +9,6 @@
 
 #define PWRLOSS_GET_PID     _IOW(PWRLOSS_MAGIC, 1, signed long long)
 
-#define PWRLOSS_NOTIFY      _IOW(PWRLOSS_MAGIC, 2, bool)
+#define PWRLOSS_NOTIFY      _IOR(PWRLOSS_MAGIC, 2, int)
 
 #endif /* NETICO_PWRLOSS_IOCTL_ */
