@@ -117,7 +117,7 @@ static int __init pwrloss_gpio_init(void) {
     
     status = request_irq(irqNumber,
                         (irq_handler_t) pwrloss_irq_handler,
-                        (IRQF_TRIGGER_RISING && IRQF_TRIGGER_HIGH),
+                        (IRQF_TRIGGER_RISING || IRQF_TRIGGER_FALLING),
                         "power-loss-gpio-handler",
                         NULL);
 
@@ -171,23 +171,30 @@ static void __exit pwrloss_gpio_exit(void) {
 
 static irq_handler_t pwrloss_irq_handler(unsigned int irq, void *dev_id, \
                                          struct pt_regs *regs) {
-    
-    printk(KERN_WARNING "pwr-loss-detect-driver: Power loss detected!\n");
-    power = 0;
+
+    if(!gpio_get_value(gpioNo)) {
+        printk(KERN_WARNING "pwr-loss-detect-driver: Power loss detected!\n");
+        power = 1;
+    }
+    else {
+        printk(KERN_WARNING "pwr-loss-detect-driver: Power OK!\n");
+        power = 0;
+    }
+
     return (irq_handler_t) IRQ_HANDLED;
 }
 
 static long pwrloss_ioctl(struct file * fd, unsigned int cmd, unsigned long arg) {
         
         switch(cmd){
-            case PWRLOSS_GET_PID:
-                break;
 
             case PWRLOSS_NOTIFY:
-                printk(KERN_INFO "entered pwrloss notify sw case\n");
                 ret = copy_to_user((int32_t*) arg, &power, sizeof(power));
-                printk(KERN_INFO "return value of copy to user is: %d\n", ret);
                 break;
+            
+            //case PWRLOSS_WRITE:
+            //    ret = copy_from_user((int32_t*) arg, &power, sizeof(power));
+            //    break;
         }
 
         return 0;
