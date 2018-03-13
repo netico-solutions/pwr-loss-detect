@@ -59,7 +59,7 @@ static struct cdev pwrloss_cdev;
 static dev_t dev = 0;
 
 static int ret;
-int power = 1;
+static int power = 1;
 
 /* ----------------------------------------------------------------------------
  * FUNCTION PROTOTYPES
@@ -102,6 +102,7 @@ static int __init pwrloss_gpio_init(void) {
     
     gpio_request(gpioNo, "sysfs");
     gpio_direction_input(gpioNo);
+    gpio_set_debounce(gpioNo, 1);
     gpio_export(gpioNo, false); //boolean value prevents direction change from 
                                 //user space
 
@@ -117,7 +118,7 @@ static int __init pwrloss_gpio_init(void) {
     
     status = request_irq(irqNumber,
                         (irq_handler_t) pwrloss_irq_handler,
-                        (IRQF_TRIGGER_RISING || IRQF_TRIGGER_FALLING),
+                        (IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING),
                         "power-loss-gpio-handler",
                         NULL);
 
@@ -172,15 +173,15 @@ static void __exit pwrloss_gpio_exit(void) {
 static irq_handler_t pwrloss_irq_handler(unsigned int irq, void *dev_id, \
                                          struct pt_regs *regs) {
 
-    if(!gpio_get_value(gpioNo)) {
+    power = !gpio_get_value(gpioNo);
+        
+    if(!power) {
         printk(KERN_WARNING "pwr-loss-detect-driver: Power loss detected!\n");
-        power = 1;
     }
     else {
         printk(KERN_WARNING "pwr-loss-detect-driver: Power OK!\n");
-        power = 0;
     }
-
+    printk(KERN_WARNING "power: %d\n", power);
     return (irq_handler_t) IRQ_HANDLED;
 }
 
