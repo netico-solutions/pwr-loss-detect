@@ -35,7 +35,7 @@ static int recv_value_from_driver(void);
 static int recv_value_from_driver(void) {
 	int fd;
     int power;
-    int * retval;
+    int retval;
 
 	fd = open("/dev/pwrloss_device", O_RDWR);
     if(fd < 0) {
@@ -43,9 +43,8 @@ static int recv_value_from_driver(void) {
         return errno;
     }
 	
-    if(retval = ioctl(fd, PWRLOSS_READ, (int32_t *) &power) < 0) {
+    if((retval = ioctl(fd, PWRLOSS_READ, (int32_t *) &power) < 0)) {
         printf("ioctl failed and errno is: %s\n", strerror(retval));
-        return -1;
     }
     
     return retval;
@@ -53,21 +52,19 @@ static int recv_value_from_driver(void) {
 
 
 static PyObject * recv_value_wrapper(PyObject * self, PyObject * args) {
-    int * result;
+    int result;
     PyObject * pyVal;
     PyObject * ret;
 
-    result = recv_value_from_driver(void);
+    result = recv_value_from_driver();
     pyVal = Py_BuildValue("i", result);
 
     if(PyObject_IsTrue(pyVal) < 0) {
-        printf("Py_BuildValue returned an error. Could not determine result.\n")};
-        return -1;
+        printf("Py_BuildValue returned an error. Could not determine result.\n");
     }
-    else {
-        ret = pyVal;
-        return ret;
-    }
+    ret = pyVal;
+    
+    return ret;
 };
 
 static PyMethodDef PwrLossMethods[] = {
