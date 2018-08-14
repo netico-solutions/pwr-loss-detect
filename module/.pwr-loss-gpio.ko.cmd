@@ -1,0 +1,1 @@
+cmd_/home/netico/pwr-loss-detect/module/pwr-loss-gpio.ko := arm-linux-gnueabihf-ld -EL -r  -T ./scripts/module-common.lds --build-id  -o /home/netico/pwr-loss-detect/module/pwr-loss-gpio.ko /home/netico/pwr-loss-detect/module/pwr-loss-gpio.o /home/netico/pwr-loss-detect/module/pwr-loss-gpio.mod.o
