@@ -5,6 +5,6 @@
 
 
 #define PWRLOSS_MAGIC		's'
-#define PWRLOSS_READ        _IOR(PWRLOSS_MAGIC, 2, int)
+#define PWRLOSS_READ        _IOR(PWRLOSS_MAGIC, 3, int)
 
 #endif

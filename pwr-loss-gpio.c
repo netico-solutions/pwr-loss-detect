@@ -51,7 +51,7 @@ MODULE_VERSION("1.0");
  * VARIABLES
  * ----------------------------------------------------------------------------
  */
-static unsigned int gpioNo = 46; //hardcoded gpio pin number gpio1_14
+static unsigned int gpioNo = 46; //hardcoded gpio pin number gpio1_14 TODO
 static unsigned int irqNumber;
 
 static struct class *dev_class;
@@ -105,7 +105,7 @@ static int __init pwrloss_gpio_init(void) {
     
     // This is clear
     gpio_request(gpioNo, "sysfs"); // Claim pin with gpioNo and name it "sysfs"
-    // TODO maybe check return value here for errors?
+    // TOD maybe check return value here for errors?
     gpio_direction_input(gpioNo);
     gpio_set_debounce(gpioNo, 1);
     gpio_export(gpioNo, false); //boolean value prevents direction change from 
@@ -130,7 +130,7 @@ static int __init pwrloss_gpio_init(void) {
                         "power-loss-gpio-handler",  // Shown in /proc/interrupts
                         NULL);
     
-    // TODO maybe check the status here for errors?
+    // TOD maybe check the status here for errors?
     if (status < 0) {
         printk(KERN_WARNING "pwr-loss-detect-driver: Invalid GPIO number!\n");
         free_irq(irqNumber, NULL);
@@ -217,6 +217,10 @@ static long pwrloss_ioctl(struct file * fd, unsigned int cmd, unsigned long arg)
         switch(cmd){
 
             case PWRLOSS_NOTIFY:
+                ret = copy_to_user((int32_t*) arg, &power, sizeof(power));
+                break;
+            
+            case PWRLOSS_READ:
                 ret = copy_to_user((int32_t*) arg, &power, sizeof(power));
                 break;
             

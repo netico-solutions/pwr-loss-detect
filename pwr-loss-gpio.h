@@ -11,4 +11,6 @@
 
 #define PWRLOSS_NOTIFY      _IOR(PWRLOSS_MAGIC, 2, int)
 
+#define PWRLOSS_READ        _IOR(PWRLOSS_MAGIC, 3, int)
+
 #endif /* NETICO_PWRLOSS_IOCTL_ */

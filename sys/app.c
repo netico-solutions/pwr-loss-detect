@@ -88,7 +88,7 @@ static PyObject * recv_value_wrapper(PyObject * self, PyObject * args) {
 static PyMethodDef PwrLossMethods[] = {
     // "pwrloss" here is function name
     { "pwrloss", recv_value_wrapper, METH_VARARGS, "Get pin value from the driver"},
-    { "dummy_number", show_dummy_number, METH_VARARGS, "Just show some number"},
+    { "dummy_number", show_dummy_number, METH_VARARGS, "Just show some random 0-100 number"},
     {NULL, NULL, 0, NULL}
 };
 
