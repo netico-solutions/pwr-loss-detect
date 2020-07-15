@@ -131,6 +131,14 @@ static int __init pwrloss_gpio_init(void) {
                         NULL);
     
     // TODO maybe check the status here for errors?
+    if (status < 0) {
+        printk(KERN_WARNING "pwr-loss-detect-driver: Invalid GPIO number!\n");
+        free_irq(irqNumber, NULL);
+        gpio_unexport(gpioNo);
+        gpio_free(gpioNo);
+        printk(KERN_INFO "Device driver initialization aborted!\n");
+        return -ENODEV;
+    }
 
     // -------- Odavde kod za cdev --------
     

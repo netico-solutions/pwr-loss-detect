@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <time.h>
 
 #include "app.h"
 
@@ -48,10 +49,25 @@ static int recv_value_from_driver(void) {
         printf("ioctl failed and errno is: %s\n", strerror(retval));
     }
     
-    // Maybe return power here because retval contains 0 or ERRORCODE?
+    // TODO Maybe return power here because retval contains 0 or ERRORCODE?
+    
     return retval;
 }
 
+static int dummy_number(void){
+
+    srand(time(0));
+    int tmp = (int) ((rand() % 
+           (100 - 0 + 1)) + 0);
+    return tmp;
+};
+
+static PyObject * show_dummy_number(PyObject * self, PyObject * args){
+    int result = dummy_number();
+    PyObject * PyVal;
+    PyVal = Py_BuildValue("i", result);
+    return PyVal;
+};
 
 static PyObject * recv_value_wrapper(PyObject * self, PyObject * args) {
     int result;
@@ -70,11 +86,14 @@ static PyObject * recv_value_wrapper(PyObject * self, PyObject * args) {
 };
 
 static PyMethodDef PwrLossMethods[] = {
+    // "pwrloss" here is function name
     { "pwrloss", recv_value_wrapper, METH_VARARGS, "Get pin value from the driver"},
+    { "dummy_number", show_dummy_number, METH_VARARGS, "Just show some number"},
     {NULL, NULL, 0, NULL}
 };
 
 DL_EXPORT(void) initpwrloss(void) {
+    // "pwrloss" here is python package name
     Py_InitModule("pwrloss", PwrLossMethods);
 }
 
