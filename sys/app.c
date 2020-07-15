@@ -37,6 +37,7 @@ static int recv_value_from_driver(void) {
     int power;
     int retval;
 
+    // fd is file descriptor
 	fd = open("/dev/pwrloss_device", O_RDWR);
     if(fd < 0) {
         perror("Failed to open device!\n");
@@ -47,6 +48,7 @@ static int recv_value_from_driver(void) {
         printf("ioctl failed and errno is: %s\n", strerror(retval));
     }
     
+    // Maybe return power here because retval contains 0 or ERRORCODE?
     return retval;
 }
 

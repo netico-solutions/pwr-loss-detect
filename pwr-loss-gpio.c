@@ -92,6 +92,9 @@ static int __init pwrloss_gpio_init(void) {
     
     printk(KERN_INFO "pwr-loss-detect-driver: Initializing..\n");
 
+    // -------- Prvo nesto vezano za GPIO sto mislim da nema veze sa cdev --------
+    
+    // First check pin number validity
     if(!gpio_is_valid(gpioNo)) {
         printk(KERN_WARNING "pwr-loss-detect-driver: Invalid GPIO number!\n");
         return -ENODEV;
@@ -100,7 +103,9 @@ static int __init pwrloss_gpio_init(void) {
         printk(KERN_INFO "pwr-loss-detect-driver: Initialized..\n");
     }
     
-    gpio_request(gpioNo, "sysfs");
+    // This is clear
+    gpio_request(gpioNo, "sysfs"); // Claim pin with gpioNo and name it "sysfs"
+    // TODO maybe check return value here for errors?
     gpio_direction_input(gpioNo);
     gpio_set_debounce(gpioNo, 1);
     gpio_export(gpioNo, false); //boolean value prevents direction change from 
@@ -114,14 +119,22 @@ static int __init pwrloss_gpio_init(void) {
         
     }
     
+    // -------- IRQ (interrupt request) --------
+    
+    // Map GPIO number to IRQ number
     irqNumber = gpio_to_irq(gpioNo);
     
     status = request_irq(irqNumber,
-                        (irq_handler_t) pwrloss_irq_handler,
-                        (IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING),
-                        "power-loss-gpio-handler",
+                        (irq_handler_t) pwrloss_irq_handler,  // Function called when the interrupt happens
+                        (IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING),  // Interrupt flags
+                        "power-loss-gpio-handler",  // Shown in /proc/interrupts
                         NULL);
+    
+    // TODO maybe check the status here for errors?
 
+    // -------- Odavde kod za cdev --------
+    
+    // Allocate mem block
     if((alloc_chrdev_region(&dev, 0, 1, "pwrloss_Dev")) <0) {
         printk(KERN_WARNING "Cannot allocate major number!\n");
         return -1;
@@ -129,20 +142,26 @@ static int __init pwrloss_gpio_init(void) {
     printk(KERN_INFO "Major = %d Minor = %d \n", MAJOR(dev), MINOR(dev));
     
 
+    // Allocate and initialize the cdev
     cdev_init(&pwrloss_cdev, &pwrloss_fops);
     pwrloss_cdev.owner = THIS_MODULE;
     pwrloss_cdev.ops = &pwrloss_fops;
     
+    // Add cdev to system
     if((cdev_add(&pwrloss_cdev, dev, 1)) < 0) {
         printk(KERN_WARNING "Cannot add the device to the system!\n");
         goto r_class;
     }
 
+    // Create a /dev/ entry from kernel space
+    
+    // Create a virtual device class that will appear in /sys/class/pwrloss_class
     if((dev_class = class_create(THIS_MODULE, "pwrloss_class")) == NULL) {
         printk(KERN_WARNING "Cannot create the struct class!\n");
         goto r_class;
     }
     
+    // Create a device entry in /dev/pwrloss_device and register it with sysfs
     if((device_create(dev_class, NULL, dev, NULL, "pwrloss_device")) == NULL) {
         printk(KERN_WARNING "Cannot create the device! \n");
         goto r_device;
