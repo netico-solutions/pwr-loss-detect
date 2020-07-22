@@ -1,0 +1,1 @@
+cmd_/data/workspace/pwr-loss-detect/pwr-loss-gpio.ko := /opt/gcc-linaro-4.9-2015.05-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-ld -EL -r  -T ./scripts/module-common.lds --build-id  -o /data/workspace/pwr-loss-detect/pwr-loss-gpio.ko /data/workspace/pwr-loss-detect/pwr-loss-gpio.o /data/workspace/pwr-loss-detect/pwr-loss-gpio.mod.o
