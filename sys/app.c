@@ -49,6 +49,8 @@ static int recv_value_from_driver(void) {
         printf("ioctl failed and errno is: %s\n", strerror(retval));
     }
     
+    close(fd);
+    
     // TODO Maybe return power here because retval contains 0 or ERRORCODE?
     
     return power;
