@@ -51,7 +51,7 @@ static int recv_value_from_driver(void) {
     
     // TODO Maybe return power here because retval contains 0 or ERRORCODE?
     
-    return retval;
+    return power;
 }
 
 static int dummy_number(void){

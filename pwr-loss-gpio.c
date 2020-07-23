@@ -51,7 +51,9 @@ MODULE_VERSION("1.0");
  * VARIABLES
  * ----------------------------------------------------------------------------
  */
-static unsigned int gpioNo = 46; //hardcoded gpio pin number gpio1_14 TODO
+static unsigned int gpioNo = 46; //hardcoded gpio pin number gpio1_14
+                                 // 46 = 1 (from gpio1_14) * 32 (for 32 bit arch) \
+                                 // + 14 (from gpio1_14)
 static unsigned int irqNumber;
 
 static struct class *dev_class;
